@@ -67,25 +67,32 @@ func (client *Client) AddDependency(service, name, address string, want interfac
 func (dep *dependency) checkDependency() {
 	resp, err := http.Get(dep.Address)
 	if err != nil {
-		dep.Validated = false
-	}
-
-	body, err := ioutil.ReadAll(io.Reader(resp.Body))
-	if err != nil {
-		dep.Validated = false
-	}
-
-	if err := resp.Body.Close(); err != nil {
+		fmt.Errorf("failed to validate dependency %v: %v", dep.Name, err)
 		dep.Validated = false
 	}
 
 	var got interface{}
 
-	if err := json.Unmarshal(body, &got); err != nil {
-		dep.Validated = false
+	if resp != nil && resp.Body != nil {
+		body, err := ioutil.ReadAll(io.Reader(resp.Body))
+		if err != nil {
+			dep.Validated = false
+		}
+
+		if err := resp.Body.Close(); err != nil {
+			dep.Validated = false
+		}
+
+		if err := json.Unmarshal(body, &got); err != nil {
+			dep.Validated = false
+		}
+	} else {
+		got = nil
 	}
 
 	if !reflect.DeepEqual(got, dep.Want) {
 		dep.Validated = false
 	}
+
+	dep.Validated = true
 }

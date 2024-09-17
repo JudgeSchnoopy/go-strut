@@ -4,7 +4,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (server *Server) router() *mux.Router {
+func (server *Server) sonarRouter() *mux.Router {
 	r := mux.NewRouter()
 
 	r.Use(
@@ -16,6 +16,7 @@ func (server *Server) router() *mux.Router {
 	r.HandleFunc("/registry", server.showRegistryHandler).Methods("GET")
 	r.HandleFunc("/register", server.registerHandler).Methods("POST")
 	r.HandleFunc("/register", server.removeHandler).Methods("DELETE")
+	r.HandleFunc("/report", server.reportHandler).Methods("POST")
 
 	return r
 }
